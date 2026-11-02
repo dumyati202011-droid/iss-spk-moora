@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>PRD - Sistem Pendukung Keputusan MOORA (ISS Indonesia & Mitra Prodia)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+    @page {
+      size: A4 portrait;
+      margin: 14mm 12mm 14mm 12mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #1e293b;
+      background: #ffffff;
+      font-size: 9.5pt;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      padding: 0;
+      background: white;
+    }
+
+    .page-break {
+      page-break-before: always;
+      padding-top: 6mm;
+    }
+
+    /* Header Banner */
+    .header-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px 18px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%);
+      color: #ffffff;
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .header-badge {
+      display: inline-block;
+      font-size: 7.5pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(99, 102, 241, 0.35);
+      border: 1px solid rgba(165, 180, 252, 0.4);
+      color: #c7d2fe;
+      padding: 3px 8px;
+      border-radius: 20px;
+      margin-bottom: 6px;
+    }
+
+    .header-title {
+      font-size: 15pt;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      margin-bottom: 4px;
+      color: #ffffff;
+    }
+
+    .header-subtitle {
+      font-size: 9pt;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .meta-item {
+      font-size: 8pt;
+    }
+
+    .meta-label {
+      color: #94a3b8;
+      font-size: 7.2pt;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .meta-value {
+      font-weight: 600;
+      color: #f8fafc;
+      margin-top: 1px;
+    }
+
+    /* Section Styles */
+    .section {
+      margin-bottom: 13px;
+    }
+
+    .section-title {
+      font-size: 10.5pt;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 7px;
+      padding-bottom: 3px;
+      border-bottom: 1.5px solid #e2e8f0;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .section-title .num-badge {
+      background: #4f46e5;
+      color: white;
+      font-size: 8pt;
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    p {
+      margin-bottom: 6px;
+      color: #334155;
+      text-align: justify;
+    }
+
+    /* 2 Columns & Grid */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* Cards */
+    .card {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #f8fafc;
+    }
+
+    .card-accent-indigo {
+      border-left: 3.5px solid #4f46e5;
+    }
+
+    .card-accent-emerald {
+      border-left: 3.5px solid #059669;
+    }
+
+    .card-accent-amber {
+      border-left: 3.5px solid #d97706;
+    }
+
+    .card-accent-rose {
+      border-left: 3.5px solid #e11d48;
+    }
+
+    .card h4 {
+      font-size: 9pt;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card p {
+      font-size: 8.3pt;
+      line-height: 1.4;
+      margin-bottom: 0;
+      color: #475569;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      font-size: 7pt;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-primary { background: #e0e7ff; color: #4338ca; }
+    .badge-success { background: #d1fae5; color: #047857; }
+    .badge-warning { background: #fef3c7; color: #b45309; }
+    .badge-info { background: #e0f2fe; color: #0369a1; }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8.2pt;
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #0f172a;
+      text-align: left;
+      padding: 6px 8px;
+      font-weight: 700;
+      border: 1px solid #cbd5e1;
+      font-size: 7.8pt;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    td {
+      padding: 5px 8px;
+      border: 1px solid #e2e8f0;
+      color: #334155;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+
+    /* Math Box */
+    .formula-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8pt;
+      color: #0f172a;
+      margin: 5px 0 8px 0;
+    }
+
+    .formula-line {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3px;
+    }
+
+    .formula-line:last-child {
+      margin-bottom: 0;
+    }
+
+    .formula-tag {
+      font-weight: 700;
+      color: #4f46e5;
+    }
+
+    /* Lists */
+    ul {
+      padding-left: 14px;
+      margin-bottom: 6px;
+    }
+
+    li {
+      font-size: 8.4pt;
+      color: #334155;
+      margin-bottom: 2px;
+      line-height: 1.35;
+    }
+
+    li strong {
+      color: #0f172a;
+    }
+
+    /* Footer */
+    .doc-footer {
+      margin-top: 12px;
+      padding-top: 8px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 7.5pt;
+      color: #94a3b8;
+    }
+
+    /* Callout Note */
+    .callout {
+      border: 1px solid #c7d2fe;
+      background: #eef2ff;
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin: 6px 0;
+      font-size: 8.2pt;
+      color: #312e81;
+    }
+    .callout strong {
+      color: #1e1b4b;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN 1 -->
+  <div class="page">
+    <div class="header-card">
+      <div class="header-badge">PRODUCT REQUIREMENT DOCUMENT (PRD) &bull; SKRIPSI &amp; SISTEM OPERASIONAL</div>
+      <div class="header-title">Sistem Pendukung Keputusan Evaluasi Kinerja &amp; Rekomendasi Insentif (MOORA)</div>
+      <div class="header-subtitle">Studi Kasus: Personel Outsourcing PT ISS Indonesia pada Laboratorium Klinik Prodia (Kebayoran)</div>
+      
+      <div class="meta-grid">
+        <div class="meta-item">
+          <div class="meta-label">ID Dokumen</div>
+          <div class="meta-value">PRD-SPK-MOORA-2026</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Versi &amp; Status</div>
+          <div class="meta-value">v1.0 (Production Ready)</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Metode Inti</div>
+          <div class="meta-value">MOORA (Benefit &amp; Cost)</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Target Pengguna</div>
+          <div class="meta-value">SPV ISS, HR Pusat, Manager Prodia</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. LATAR BELAKANG & PROBLEM STATEMENT -->
+    <div class="section">
+      <div class="section-title"><span class="num-badge">1</span> Latar Belakang &amp; Problem Statement</div>
+      <div class="grid-2">
+        <div class="card card-accent-rose">
+          <h4>Kondisi Eksisting (Pain Points) <span class="badge badge-warning">Problem</span></h4>
+          <p>
+            Evaluasi 20 personel (10 Cleaning Service &amp; 10 Messenger) di Prodia selama ini dilakukan manual melalui rekap spreadsheet fisik. Proses memakan waktu <strong>3&ndash;5 hari kerja</strong> tiap akhir bulan, rentan bias kedekatan personal (subjektivitas), serta menimbulkan friksi transparansi saat penentuan penerima insentif bulanan.
+          </p>
+        </div>
+        <div class="card card-accent-emerald">
+          <h4>Solusi Sistem Usulan <span class="badge badge-success">Solution</span></h4>
+          <p>
+            Membangun aplikasi SPK terintegrasi berbasis web responsif yang mengotomatisasi penilaian melalui algoritma <strong>MOORA</strong>. Sistem memisahkan kriteria <em>Benefit</em> (produktivitas, kepatuhan SOP) dan <em>Cost</em> (keterlambatan, komplain) secara matematis akurat, instan (< 5 detik), dan dapat diaudit penuh oleh manajemen klien.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. TUJUAN & INDIKATOR KEBERHASILAN -->
+    <div class="section">
+      <div class="section-title"><span class="num-badge">2</span> Tujuan Produk &amp; Indikator Keberhasilan (KPI)</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 30%;">Tujuan Utama (Objective)</th>
+            <th style="width: 45%;">Hasil Terukur (Key Results)</th>
+            <th style="width: 25%;">Target Metrik</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Efisiensi Waktu Rekap</strong></td>
+            <td>Memangkas siklus rekapitulasi nilai dan perangkingan karyawan dari berhari-hari menjadi real-time.</td>
+            <td><span class="badge badge-success">Efisiensi &gt; 95%</span> (&le; 2 menit)</td>
+          </tr>
+          <tr>
+            <td><strong>Transparansi &amp; Akuntabilitas</strong></td>
+            <td>Menyediakan <em>audit matrix step-by-step</em> agar setiap desimal skor dapat diverifikasi bersama oleh ISS dan Prodia.</td>
+            <td><span class="badge badge-info">100% Transparan</span> (0 komplain bias)</td>
+          </tr>
+          <tr>
+            <td><strong>Standarisasi Insentif</strong></td>
+            <td>Pemberian insentif berbasis threshold nilai optimasi multiobjektif (Yi) dan rekomendasi Top 3 tanpa intervensi sepihak.</td>
+            <td><span class="badge badge-primary">SK Resmi Terbit Otomatis</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 3. PEMBAGIAN PERAN & HAK AKSES -->
+    <div class="section">
+      <div class="section-title"><span class="num-badge">3</span> Matriks Peran Pengguna (Segregation of Duties)</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 20%;">Peran (Role)</th>
+            <th style="width: 28%;">Persona &amp; Entitas</th>
+            <th style="width: 52%;">Hak Akses &amp; Tanggung Jawab Utama</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge-primary">spv_iss</span><br><strong>Site Supervisor</strong></td>
+            <td><strong>Septo Aribowo</strong><br>Supervisor ISS Site Prodia Kebayoran</td>
+            <td>
+              &bull; Input dan update nilai operasional harian/bulanan 20 karyawan.<br>
+              &bull; Menjalankan tombol sinkronisasi kalkulasi MOORA.<br>
+              &bull; Melihat peringkat awal dan rekomendasi kandidat berkinerja tinggi.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-warning">admin</span><br><strong>Super Admin</strong></td>
+            <td><strong>Agung Permadi</strong><br>HRD Operations PT ISS Indonesia Pusat</td>
+            <td>
+              &bull; Mengelola master data karyawan (NIK, nama, divisi CS/Messenger).<br>
+              &bull; Mengatur parameter bobot kriteria (<i>W<sub>j</sub></i>) dan tipe atribut (Benefit/Cost).<br>
+              &bull; Mengelola periode penilaian bulanan dan hak akses akun pengguna.
+            </td>
+          </tr>
+          <tr>
+            <td><span class="badge badge-success">manager_prodia</span><br><strong>Branch Manager</strong></td>
+            <td><strong>Siska Darmayanti</strong><br>Branch Manager Prodia Kebayoran</td>
+            <td>
+              &bull; Melakukan audit verifikasi matriks normalisasi &amp; nilai optimasi MOORA.<br>
+              &bull; Mengesahkan (Approval) daftar final penerima insentif bulanan.<br>
+              &bull; Mencetak SK penetapan insentif dan Berita Acara Evaluasi Kinerja (PDF).
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="doc-footer">
+      <span>PRD &bull; Sistem Pendukung Keputusan MOORA (ISS Indonesia &bull; Prodia Kebayoran)</span>
+      <span>Dokumen Resmi &bull; Halaman 1 dari 2</span>
+    </div>
+  </div>
+
+  <!-- HALAMAN 2 -->
+  <div class="page page-break">
+    <!-- 4. LOGIKA ENGINE MOORA & FORMULASI -->
+    <div class="section">
+      <div class="section-title"><span class="num-badge">4</span> Logika Engine Perhitungan MOORA</div>
+      <p>
+        Algoritma <em>Multi-Objective Optimization on the basis of Ratio Analysis</em> (MOORA) memproses matriks evaluasi <i>m</i> alternatif dan <i>n</i> kriteria melalui 4 tahapan matematis terstandar:
+      </p>
+
+      <div class="formula-box">
+        <div class="formula-line">
+          <span><strong>1. Normalisasi Matriks (Vektor):</strong></span>
+          <span class="formula-tag">X*<sub>ij</sub> = x<sub>ij</sub> / &radic;(&sum;<sub>k=1</sub><sup>m</sup> x<sub>kj</sub>&sup2;)</span>
+        </div>
+        <div class="formula-line">
+          <span><strong>2. Pembobotan Matriks:</strong></span>
+          <span class="formula-tag">W<sub>ij</sub> = X*<sub>ij</sub> &times; w<sub>j</sub></span>
+        </div>
+        <div class="formula-line">
+          <span><strong>3. Nilai Optimasi Multiobjektif:</strong></span>
+          <span class="formula-tag">y<sub>i</sub> = &sum;<sub>j=1</sub><sup>g</sup> W<sub>ij</sub> (Benefit) &minus; &sum;<sub>j=g+1</sub><sup>n</sup> W<sub>ij</sub> (Cost)</span>
+        </div>
+        <div class="formula-line">
+          <span><strong>4. Perangkingan Akhir:</strong></span>
+          <span class="formula-tag">Peringkat 1 = Alternatif dengan Nilai y<sub>i</sub> Tertinggi</span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card card-accent-indigo">
+          <h4>Kriteria Karyawan Cleaning Service</h4>
+          <p>
+            &bull; <strong>C1: Kebersihan &amp; Kerapihan</strong> (Benefit, 25%)<br>
+            &bull; <strong>C2: Kepatuhan SOP Sterilisasi</strong> (Benefit, 20%)<br>
+            &bull; <strong>C3: Kedisiplinan &amp; Kehadiran</strong> (Benefit, 20%)<br>
+            &bull; <strong>C4: Kerjasama Tim &amp; Sikap</strong> (Benefit, 15%)<br>
+            &bull; <strong>C5: Jumlah Komplain User</strong> (Cost, 20%)
+          </p>
+        </div>
+        <div class="card card-accent-emerald">
+          <h4>Kriteria Karyawan Messenger / Kurir</h4>
+          <p>
+            &bull; <strong>C1: Ketepatan Waktu Antar Sampel</strong> (Benefit, 30%)<br>
+            &bull; <strong>C2: Keamanan Penanganan Sampel</strong> (Benefit, 25%)<br>
+            &bull; <strong>C3: Kepatuhan Rute &amp; Komunikasi</strong> (Benefit, 15%)<br>
+            &bull; <strong>C4: Keterlambatan Pengiriman</strong> (Cost, 15%)<br>
+            &bull; <strong>C5: Kerusakan / Insiden Sampel</strong> (Cost, 15%)
+          </p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Aturan Bisnis Insentif (Incentive Threshold):</strong> Karyawan berhak atas insentif jika memenuhi batas minimum <strong>y<sub>i</sub> &ge; 0.200</strong>. Tiga skor teratas (Top 3) per divisi memperoleh Insentif Utama (Rp 500.000 / orang), peringkat 4&ndash;6 memperoleh Insentif Penunjang (Rp 300.000 / orang), dan sisanya mendapat pembinaan berkala.
+      </div>
+    </div>
+
+    <!-- 5. FITUR & SPESIFIKASI MODUL -->
+    <div class="section">
+      <div class="section-title"><span class="num-badge">5</span> Ruang Lingkup Modul &amp; Fitur Utama</div>
+      <div class="grid-3">
+        <div class="card">
+          <h4>Dashboard &amp; KPI</h4>
+          <p>Ringkasan real-time total staf, rata-rata skor performa, widget Top 3 berkinerja tinggi, dan grafik distribusi insentif.</p>
+        </div>
+        <div class="card">
+          <h4>Input &amp; Sinkronisasi</h4>
+          <p>Form penilaian cepat multi-kriteria untuk 20 personel dengan auto-validation dan feedback notifikasi instan.</p>
+        </div>
+        <div class="card">
+          <h4>Matrix Auditor</h4>
+          <p>Tampilan transparan 4 tab: Matriks Keputusan, Normalisasi Vektor, Matriks Terbobot, dan Tabel Nilai Optimasi Yi.</p>
+        </div>
+        <div class="card">
+          <h4>Manajemen Kriteria</h4>
+          <p>Penyesuaian bobot fleksibel oleh Super Admin dengan validasi otomatis akumulasi bobot harus tepat bernilai 100%.</p>
+        </div>
+        <div class="card">
+          <h4>Approval Manager</h4>
+          <p>Fitur verifikasi satu klik oleh Branch Manager Prodia untuk mengesahkan daftar insentif bulanan resmi.</p>
+        </div>
+        <div class="card">
+          <h4>Cetak SK &amp; Laporan</h4>
+          <p>Ekspor siap cetak dokumen Berita Acara dan Surat Keputusan (SK) insentif bertanda tangan digital kedua pihak.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. SPESIFIKASI TEKNOLOGI & NON-FUNCTIONAL -->
+    <div class="section">
+      <div class="section-title"><span class="num-badge">6</span> Arsitektur Teknis &amp; Non-Functional Requirements</div>
+      <div class="grid-2">
+        <div class="card card-accent-amber">
+          <h4>Technology Stack</h4>
+          <p>
+            &bull; <strong>Frontend &amp; Framework:</strong> Next.js 15 (App Router), React, TypeScript<br>
+            &bull; <strong>Styling &amp; UX:</strong> Tailored Modern CSS, Responsive Bottom Dock PWA-ready<br>
+            &bull; <strong>Database &amp; ORM:</strong> SQLite / PostgreSQL dengan Prisma ORM<br>
+            &bull; <strong>Rendering:</strong> Hybrid SSR &amp; Client-Side Interactive Filtering
+          </p>
+        </div>
+        <div class="card card-accent-indigo">
+          <h4>Non-Functional Requirements</h4>
+          <p>
+            &bull; <strong>Response Time:</strong> Kalkulasi 20 data MOORA selesai dalam &lt; 150 milidetik.<br>
+            &bull; <strong>Mobile First:</strong> Navigasi bawah (Bottom Bar) optimal di layar ponsel smartphone 360px&ndash;430px.<br>
+            &bull; <strong>Security &amp; RBAC:</strong> Pembatasan hak akses berbasis sesi (Supervisor, Admin, Manager).<br>
+            &bull; <strong>Data Integrity:</strong> Riwayat penilaian periode lama tersimpan permanen (immutability).
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="doc-footer">
+      <span>Dokumen Disetujui Bersama: PT ISS Indonesia &amp; PT Prodia Widyahusada Tbk &bull; Hak Cipta &copy; 2026</span>
+      <span>Halaman 2 dari 2</span>
+    </div>
+  </div>
+
+</body>
+</html>

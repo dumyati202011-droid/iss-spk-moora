@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  fullName  String
+  role      String   @default("SUPERVISOR") // SUPER_ADMIN, SUPERVISOR, LAB_MANAGER
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assessments Assessment[]
+}
+
+model Employee {
+  id            String   @id @default(uuid())
+  nip           String   @unique
+  fullName      String
+  division      String   // CLEANING_SERVICE, MESSENGER
+  placementUnit String   @default("Prodia Kebayoran")
+  joinDate      DateTime @default(now())
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  assessments  Assessment[]
+  mooraResults MooraResult[]
+}
+
+model Criteria {
+  id          String   @id @default(uuid())
+  code        String   // C1, C2, C3, C4, C5
+  name        String
+  type        String   // BENEFIT, COST
+  weight      Float    // Bobot (contoh: 0.25 atau 25%)
+  division    String   // CLEANING_SERVICE, MESSENGER
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  scores AssessmentScore[]
+
+  @@unique([code, division])
+}
+
+model AssessmentPeriod {
+  id         String   @id @default(uuid())
+  periodName String   // Contoh: "Kuartal III 2026", "Semester I 2026"
+  year       Int      // 2026
+  status     String   @default("ACTIVE") // ACTIVE, CLOSED, DRAFT
+  startDate  DateTime
+  endDate    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  assessments  Assessment[]
+  mooraResults MooraResult[]
+}
+
+model Assessment {
+  id         String   @id @default(uuid())
+  periodId   String
+  employeeId String
+  userId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  period    AssessmentPeriod  @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  employee  Employee          @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  evaluator User              @relation(fields: [userId], references: [id])
+  scores    AssessmentScore[]
+
+  @@unique([periodId, employeeId])
+}
+
+model AssessmentScore {
+  id           String @id @default(uuid())
+  assessmentId String
+  criteriaId   String
+  rawScore     Float  // Nilai input X_ij (contoh: 85.0)
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  criteria   Criteria   @relation(fields: [criteriaId], references: [id])
+
+  @@unique([assessmentId, criteriaId])
+}
+
+model MooraResult {
+  id           String   @id @default(uuid())
+  periodId     String
+  employeeId   String
+  division     String   // CLEANING_SERVICE, MESSENGER
+  sumBenefit   Float
+  sumCost      Float
+  yScore       Float    // Nilai akhir optimasi multiobjektif
+  rankPosition Int
+  createdAt    DateTime @default(now())
+
+  period   AssessmentPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  employee Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([periodId, employeeId])
+}
