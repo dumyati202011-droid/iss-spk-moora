@@ -44,6 +44,7 @@ import {
   SlidersHorizontal,
   X,
   CheckCheck,
+  Edit3,
 } from "lucide-react";
 
 import {
@@ -204,6 +205,23 @@ export default function Home() {
   const [newNip, setNewNip] = useState("");
   const [newName, setNewName] = useState("");
   const [newDivision, setNewDivision] = useState<"CLEANING_SERVICE" | "MESSENGER">("CLEANING_SERVICE");
+
+  // Form Kriteria Baru & Edit (Khusus Admin HR)
+  const [showAddCriteriaForm, setShowAddCriteriaForm] = useState(false);
+  const [newCritCode, setNewCritCode] = useState("");
+  const [newCritName, setNewCritName] = useState("");
+  const [newCritType, setNewCritType] = useState<"BENEFIT" | "COST">("BENEFIT");
+  const [newCritWeight, setNewCritWeight] = useState("0.20");
+  const [newCritDesc, setNewCritDesc] = useState("");
+  const [critSaving, setCritSaving] = useState(false);
+
+  // Edit Kriteria Modal State
+  const [editingCriteria, setEditingCriteria] = useState<Criteria | null>(null);
+  const [editCritCode, setEditCritCode] = useState("");
+  const [editCritName, setEditCritName] = useState("");
+  const [editCritType, setEditCritType] = useState<"BENEFIT" | "COST">("BENEFIT");
+  const [editCritWeight, setEditCritWeight] = useState("0.20");
+  const [editCritDesc, setEditCritDesc] = useState("");
 
   // Auth State
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
@@ -465,6 +483,123 @@ export default function Home() {
       }
     } catch {
       showToast("Gagal menghapus karyawan", "error");
+    }
+  };
+
+  // Criteria Handlers (Add, Edit, Delete)
+  const openEditCriteriaModal = (c: Criteria) => {
+    setEditingCriteria(c);
+    setEditCritCode(c.code);
+    setEditCritName(c.name);
+    setEditCritType(c.type as "BENEFIT" | "COST");
+    setEditCritWeight(c.weight.toString());
+    setEditCritDesc(c.description || "");
+  };
+
+  const handleAddCriteria = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCritName || !newCritWeight) {
+      showToast("Nama dan bobot kriteria wajib diisi", "error");
+      return;
+    }
+    const weightVal = parseFloat(newCritWeight);
+    if (isNaN(weightVal) || weightVal <= 0) {
+      showToast("Bobot kriteria harus lebih dari 0", "error");
+      return;
+    }
+
+    try {
+      setCritSaving(true);
+      const res = await fetch("/api/criteria", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: newCritCode,
+          name: newCritName,
+          type: newCritType,
+          weight: weightVal,
+          division: selectedDivision,
+          description: newCritDesc,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setNewCritCode("");
+        setNewCritName("");
+        setNewCritDesc("");
+        setNewCritWeight("0.20");
+        setShowAddCriteriaForm(false);
+        showToast(json.message || "Kriteria baru berhasil ditambahkan!");
+        await fetchData();
+        await runMooraCalculation(false);
+      } else {
+        showToast(json.message || "Gagal menambahkan kriteria", "error");
+      }
+    } catch {
+      showToast("Gagal menghubungi server", "error");
+    } finally {
+      setCritSaving(false);
+    }
+  };
+
+  const handleUpdateCriteria = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCriteria || !editCritName || !editCritWeight) {
+      showToast("Nama dan bobot kriteria wajib diisi", "error");
+      return;
+    }
+    const weightVal = parseFloat(editCritWeight);
+    if (isNaN(weightVal) || weightVal <= 0) {
+      showToast("Bobot kriteria harus lebih dari 0", "error");
+      return;
+    }
+
+    try {
+      setCritSaving(true);
+      const res = await fetch("/api/criteria", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingCriteria.id,
+          code: editCritCode,
+          name: editCritName,
+          type: editCritType,
+          weight: weightVal,
+          description: editCritDesc,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setEditingCriteria(null);
+        showToast(json.message || "Kriteria & bobot berhasil diperbarui!");
+        await fetchData();
+        await runMooraCalculation(false);
+      } else {
+        showToast(json.message || "Gagal memperbarui kriteria", "error");
+      }
+    } catch {
+      showToast("Gagal menghubungi server", "error");
+    } finally {
+      setCritSaving(false);
+    }
+  };
+
+  const handleDeleteCriteria = async (id: string, code: string, name: string) => {
+    if (!confirm(`Konfirmasi Hapus Kriteria:\nApakah Anda yakin ingin menghapus kriteria "${code} - ${name}"?\nNilai penilaian terkait kriteria ini juga akan disesuaikan.`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/criteria?id=${id}`, { method: "DELETE" });
+      const json = await res.json();
+      if (json.success) {
+        showToast(`Kriteria ${code} - ${name} berhasil dihapus.`);
+        await fetchData();
+        await runMooraCalculation(false);
+      } else {
+        showToast(json.message || "Gagal menghapus kriteria", "error");
+      }
+    } catch {
+      showToast("Gagal menghapus kriteria", "error");
     }
   };
 
@@ -1518,63 +1653,244 @@ export default function Home() {
         {/* VIEW 5: KRITERIA & BOBOT                                           */}
         {/* =================================================================== */}
         {activeMenu === "criteria" && (
-          <div className="hireism-table-card">
-            <div className="hireism-section-head">
-              <div>
-                <h3>Kriteria & Pembobotan ({selectedDivision === "CLEANING_SERVICE" ? "Cleaning Service" : "Messenger"})</h3>
-                <p style={{ fontSize: "0.82rem", color: "#8c9bb0" }}>Total bobot seluruh kriteria wajib 1.00 (100%).</p>
-              </div>
-            </div>
-
-            {!isAdmin && (
+          <div>
+            {!isAdmin ? (
               <div className="role-guard-banner">
                 <ShieldAlert size={18} />
                 <div>
                   <strong>Mode Peninjauan (Read-Only):</strong> Anda login sebagai <strong>{getRoleLabel(currentUser?.role)}</strong>. Berdasarkan kebijakan tata kelola SPK, penyesuaian bobot kriteria dan sifat Benefit/Cost hanya dapat diubah oleh <strong>Super Admin (HRD ISS Pusat)</strong>.
                 </div>
               </div>
+            ) : (
+              <div className="hireism-form-card" style={{ marginBottom: "20px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+                  <div>
+                    <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>
+                      Kelola Kriteria &amp; Pembobotan ({selectedDivision === "CLEANING_SERVICE" ? "Cleaning Service" : "Messenger"})
+                    </h3>
+                    <p style={{ fontSize: "0.82rem", color: "#64748b", margin: "4px 0 0" }}>
+                      Tambah indikator kriteria baru atau sesuaikan bobot preferensi penentu ranking MOORA.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddCriteriaForm(!showAddCriteriaForm)}
+                    className="hireism-btn-primary"
+                    style={{ fontSize: "0.82rem", padding: "8px 16px" }}
+                  >
+                    {showAddCriteriaForm ? <X size={15} /> : <Plus size={15} />}
+                    <span>{showAddCriteriaForm ? "Tutup Form" : "Tambah Kriteria Baru"}</span>
+                  </button>
+                </div>
+
+                {showAddCriteriaForm && (
+                  <form onSubmit={handleAddCriteria} style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid #e2e8f0" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px", marginBottom: "12px" }}>
+                      <div>
+                        <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>
+                          Kode Kriteria:
+                        </label>
+                        <input
+                          type="text"
+                          placeholder={`C${filteredCriteria.length + 1}`}
+                          value={newCritCode}
+                          onChange={(e) => setNewCritCode(e.target.value)}
+                          style={{ width: "100%", padding: "10px 14px", borderRadius: "12px", border: "1px solid #e2e8f0" }}
+                        />
+                        <span style={{ fontSize: "0.72rem", color: "#94a3b8" }}>Kosongkan untuk otomatis C{filteredCriteria.length + 1}</span>
+                      </div>
+
+                      <div style={{ gridColumn: "span 2" }}>
+                        <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>
+                          Nama Indikator Kriteria:
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Contoh: Ketelitian Pemeriksaan / Penanganan Sampel"
+                          value={newCritName}
+                          onChange={(e) => setNewCritName(e.target.value)}
+                          style={{ width: "100%", padding: "10px 14px", borderRadius: "12px", border: "1px solid #e2e8f0" }}
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>
+                          Sifat Kriteria:
+                        </label>
+                        <select
+                          value={newCritType}
+                          onChange={(e) => setNewCritType(e.target.value as any)}
+                          style={{ width: "100%", padding: "10px 14px", borderRadius: "12px", border: "1px solid #e2e8f0" }}
+                        >
+                          <option value="BENEFIT">BENEFIT (Semakin besar semakin baik)</option>
+                          <option value="COST">COST (Semakin kecil semakin baik)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>
+                          Bobot W (Contoh: 0.20 = 20%):
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0.01"
+                          max="1.00"
+                          placeholder="0.20"
+                          value={newCritWeight}
+                          onChange={(e) => setNewCritWeight(e.target.value)}
+                          style={{ width: "100%", padding: "10px 14px", borderRadius: "12px", border: "1px solid #e2e8f0" }}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ marginBottom: "16px" }}>
+                      <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>
+                        Deskripsi Standar Operasional / Checklist:
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Uraian indikator penilaian checklist di unit Prodia Kebayoran"
+                        value={newCritDesc}
+                        onChange={(e) => setNewCritDesc(e.target.value)}
+                        style={{ width: "100%", padding: "10px 14px", borderRadius: "12px", border: "1px solid #e2e8f0" }}
+                      />
+                    </div>
+
+                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+                      <button
+                        type="button"
+                        onClick={() => setShowAddCriteriaForm(false)}
+                        style={{ padding: "8px 16px", borderRadius: "10px", border: "1px solid #cbd5e1", background: "#f8fafc", color: "#475569", fontWeight: 600, cursor: "pointer" }}
+                      >
+                        Batal
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={critSaving}
+                        className="hireism-btn-primary"
+                        style={{ padding: "8px 20px" }}
+                      >
+                        <Plus size={15} />
+                        <span>{critSaving ? "Menyimpan..." : "Simpan Kriteria Baru"}</span>
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
             )}
 
-            <table className="hireism-table">
-              <thead>
-                <tr>
-                  <th>KODE</th>
-                  <th>NAMA KRITERIA</th>
-                  <th>SIFAT</th>
-                  <th style={{ textAlign: "right" }}>BOBOT (W)</th>
-                  <th style={{ textAlign: "right" }}>PERSENTASE</th>
-                  <th>DESKRIPSI STANDAR</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredCriteria.map((c) => (
-                  <tr key={c.id}>
-                    <td><strong>{c.code}</strong></td>
-                    <td><strong>{c.name}</strong></td>
-                    <td>
-                      <span className="hireism-pill-link" style={c.type === "BENEFIT" ? { color: "#10b981", background: "#ecfdf5" } : { color: "#ef4444", background: "#fef2f2" }}>
-                        {c.type}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: "right", fontFamily: "var(--font-mono)" }}>{c.weight.toFixed(2)}</td>
-                    <td style={{ textAlign: "right", fontWeight: 700, color: "#3b5bfd" }}>{(c.weight * 100).toFixed(0)}%</td>
-                    <td style={{ fontSize: "0.82rem", color: "#64748b" }}>{c.description}</td>
+            <div className="hireism-table-card">
+              <div className="hireism-section-head">
+                <div>
+                  <h3>Kriteria &amp; Pembobotan ({selectedDivision === "CLEANING_SERVICE" ? "Cleaning Service" : "Messenger"})</h3>
+                  <p style={{ fontSize: "0.82rem", color: "#8c9bb0" }}>Total bobot seluruh kriteria wajib 1.00 (100%) agar kalkulasi MOORA deterministik.</p>
+                </div>
+              </div>
+
+              <table className="hireism-table">
+                <thead>
+                  <tr>
+                    <th>KODE</th>
+                    <th>NAMA KRITERIA</th>
+                    <th>SIFAT</th>
+                    <th style={{ textAlign: "right" }}>BOBOT (W)</th>
+                    <th style={{ textAlign: "right" }}>PERSENTASE</th>
+                    <th>DESKRIPSI STANDAR</th>
+                    {isAdmin && <th style={{ textAlign: "center", width: "130px" }}>AKSI</th>}
                   </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr style={{ background: "#f8fafc", fontWeight: 800 }}>
-                  <td colSpan={3}>TOTAL BOBOT:</td>
-                  <td style={{ textAlign: "right", color: "#10b981", fontFamily: "var(--font-mono)" }}>
-                    {filteredCriteria.reduce((sum, c) => sum + c.weight, 0).toFixed(2)}
-                  </td>
-                  <td style={{ textAlign: "right", color: "#10b981" }}>
-                    {(filteredCriteria.reduce((sum, c) => sum + c.weight, 0) * 100).toFixed(0)}%
-                  </td>
-                  <td style={{ color: "#10b981" }}>✓ Valid (Normalisasi Lengkap)</td>
-                </tr>
-              </tfoot>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredCriteria.map((c) => (
+                    <tr key={c.id}>
+                      <td><strong>{c.code}</strong></td>
+                      <td><strong>{c.name}</strong></td>
+                      <td>
+                        <span className="hireism-pill-link" style={c.type === "BENEFIT" ? { color: "#10b981", background: "#ecfdf5" } : { color: "#ef4444", background: "#fef2f2" }}>
+                          {c.type}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: "right", fontFamily: "var(--font-mono)" }}>{c.weight.toFixed(2)}</td>
+                      <td style={{ textAlign: "right", fontWeight: 700, color: "#3b5bfd" }}>{(c.weight * 100).toFixed(0)}%</td>
+                      <td style={{ fontSize: "0.82rem", color: "#64748b" }}>{c.description}</td>
+                      {isAdmin && (
+                        <td style={{ textAlign: "center" }}>
+                          <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
+                            <button
+                              type="button"
+                              onClick={() => openEditCriteriaModal(c)}
+                              style={{
+                                padding: "6px 10px",
+                                background: "#eff6ff",
+                                color: "#2563eb",
+                                border: "1px solid #bfdbfe",
+                                borderRadius: "8px",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                fontSize: "0.75rem",
+                                fontWeight: 600,
+                              }}
+                              title="Edit Kriteria & Bobot"
+                            >
+                              <Edit3 size={13} />
+                              <span>Edit</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteCriteria(c.id, c.code, c.name)}
+                              style={{
+                                padding: "6px 8px",
+                                background: "#fef2f2",
+                                color: "#ef4444",
+                                border: "1px solid #fecaca",
+                                borderRadius: "8px",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                fontSize: "0.75rem",
+                                fontWeight: 600,
+                              }}
+                              title="Hapus Kriteria"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  {(() => {
+                    const totalWeight = filteredCriteria.reduce((sum, c) => sum + c.weight, 0);
+                    const isValidWeight = Math.abs(totalWeight - 1.0) < 0.001;
+                    return (
+                      <tr style={{ background: "#f8fafc", fontWeight: 800 }}>
+                        <td colSpan={3}>TOTAL BOBOT:</td>
+                        <td style={{ textAlign: "right", color: isValidWeight ? "#10b981" : "#eab308", fontFamily: "var(--font-mono)" }}>
+                          {totalWeight.toFixed(2)}
+                        </td>
+                        <td style={{ textAlign: "right", color: isValidWeight ? "#10b981" : "#eab308" }}>
+                          {(totalWeight * 100).toFixed(0)}%
+                        </td>
+                        <td colSpan={isAdmin ? 2 : 1} style={{ color: isValidWeight ? "#10b981" : "#dc2626" }}>
+                          {isValidWeight ? (
+                            <span>✓ Valid (Total Bobot Tepat 1.00 / 100%)</span>
+                          ) : (
+                            <span>⚠️ Total bobot saat ini {(totalWeight * 100).toFixed(1)}%. Sesuaikan agar total 100% (1.00) untuk MOORA!</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })()}
+                </tfoot>
+              </table>
+            </div>
           </div>
         )}
 
@@ -2064,6 +2380,134 @@ export default function Home() {
                 Simpan Pengaturan
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* 4.2 MODAL EDIT KRITERIA & PEMBOBOTAN MOORA                           */}
+      {/* ===================================================================== */}
+      {editingCriteria && (
+        <div className="settings-modal-backdrop" onClick={() => setEditingCriteria(null)}>
+          <div className="settings-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "560px" }}>
+            <div className="settings-modal-header">
+              <div className="settings-title-group">
+                <div className="settings-header-icon" style={{ background: "#eff6ff", color: "#2563eb" }}>
+                  <Scale size={22} />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--text-main)", margin: 0 }}>
+                    Edit Kriteria ({editingCriteria.code})
+                  </h3>
+                  <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", margin: 0 }}>
+                    Perbarui nama indikator, sifat Benefit/Cost, dan bobot preferensi MOORA
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="settings-close-btn"
+                onClick={() => setEditingCriteria(null)}
+                title="Tutup Form Edit"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateCriteria}>
+              <div className="settings-modal-body" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "12px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "var(--text-main)", marginBottom: "4px" }}>
+                      Kode Kriteria:
+                    </label>
+                    <input
+                      type="text"
+                      value={editCritCode}
+                      onChange={(e) => setEditCritCode(e.target.value)}
+                      style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: "1px solid var(--border-default)" }}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "var(--text-main)", marginBottom: "4px" }}>
+                      Nama Indikator:
+                    </label>
+                    <input
+                      type="text"
+                      value={editCritName}
+                      onChange={(e) => setEditCritName(e.target.value)}
+                      style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: "1px solid var(--border-default)" }}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "var(--text-main)", marginBottom: "4px" }}>
+                      Sifat Kriteria:
+                    </label>
+                    <select
+                      value={editCritType}
+                      onChange={(e) => setEditCritType(e.target.value as any)}
+                      style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: "1px solid var(--border-default)" }}
+                    >
+                      <option value="BENEFIT">BENEFIT (Semakin besar semakin baik)</option>
+                      <option value="COST">COST (Semakin kecil semakin baik)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "var(--text-main)", marginBottom: "4px" }}>
+                      Bobot W (Contoh: 0.20 = 20%):
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      max="1.00"
+                      value={editCritWeight}
+                      onChange={(e) => setEditCritWeight(e.target.value)}
+                      style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: "1px solid var(--border-default)" }}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "var(--text-main)", marginBottom: "4px" }}>
+                    Deskripsi Standar Evaluasi:
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={editCritDesc}
+                    onChange={(e) => setEditCritDesc(e.target.value)}
+                    placeholder="Uraian checklist mutu operasional Prodia Kebayoran..."
+                    style={{ width: "100%", padding: "10px 12px", borderRadius: "10px", border: "1px solid var(--border-default)", resize: "vertical" }}
+                  />
+                </div>
+              </div>
+
+              <div className="settings-modal-footer">
+                <button
+                  type="button"
+                  className="hireism-pill-link"
+                  onClick={() => setEditingCriteria(null)}
+                  style={{ background: "#ffffff", border: "1px solid var(--border-default)", color: "var(--text-muted)" }}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={critSaving}
+                  className="hireism-pill-link"
+                  style={{ background: "var(--brand-blue)", color: "#ffffff", border: "none", display: "flex", alignItems: "center", gap: "6px" }}
+                >
+                  <Check size={16} />
+                  <span>{critSaving ? "Menyimpan..." : "Simpan Perubahan"}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
