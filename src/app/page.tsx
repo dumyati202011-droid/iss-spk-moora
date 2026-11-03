@@ -1598,83 +1598,234 @@ export default function Home() {
                 </div>
               </div>
             ) : (
-              <div className="hireism-form-card">
-                <h3 style={{ fontSize: "1.1rem", fontWeight: 800, marginBottom: "16px" }}>Tambah Data Personel Baru</h3>
-                <form onSubmit={handleAddEmployee} style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "flex-end" }}>
-                  <div style={{ flex: 1, minWidth: "140px" }}>
-                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>NIP:</label>
-                    <input
-                      type="text"
-                      placeholder="CS-006 / MSG-005"
-                      value={newNip}
-                      onChange={(e) => setNewNip(e.target.value)}
-                      style={{ width: "100%", padding: "10px 14px", borderRadius: "12px", border: "1px solid #e2e8f0" }}
-                      required
-                    />
-                  </div>
+              <div className="hireism-form-card" style={{ marginBottom: "20px" }}>
+                <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: "#0f172a", margin: "0 0 4px" }}>
+                  Tambah Data Personel Baru
+                </h3>
+                <p style={{ fontSize: "0.82rem", color: "#64748b", margin: "0 0 18px" }}>
+                  Daftarkan personel baru PT ISS Indonesia untuk penempatan unit Laboratorium Klinik Prodia Kebayoran.
+                </p>
 
-                  <div style={{ flex: 2, minWidth: "220px" }}>
-                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>Nama Lengkap:</label>
-                    <input
-                      type="text"
-                      placeholder="Nama Karyawan"
-                      value={newName}
-                      onChange={(e) => setNewName(e.target.value)}
-                      style={{ width: "100%", padding: "10px 14px", borderRadius: "12px", border: "1px solid #e2e8f0" }}
-                      required
-                    />
-                  </div>
+                <form onSubmit={handleAddEmployee}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr)) auto",
+                      gap: "14px",
+                      alignItems: "flex-end",
+                    }}
+                  >
+                    <div>
+                      <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>
+                        NIP:
+                      </label>
+                      <input
+                        type="text"
+                        placeholder={selectedDivision === "CLEANING_SERVICE" ? "CS-010" : "MSG-007"}
+                        value={newNip}
+                        onChange={(e) => setNewNip(e.target.value)}
+                        style={{
+                          width: "100%",
+                          height: "44px",
+                          padding: "0 14px",
+                          borderRadius: "10px",
+                          border: "1px solid #cbd5e1",
+                          fontSize: "0.88rem",
+                          boxSizing: "border-box",
+                          backgroundColor: "#ffffff",
+                          outline: "none",
+                        }}
+                        required
+                      />
+                    </div>
 
-                  <div style={{ flex: 1, minWidth: "160px" }}>
-                    <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "#334155", marginBottom: "4px" }}>Divisi:</label>
-                    <select
-                      value={newDivision}
-                      onChange={(e) => setNewDivision(e.target.value as any)}
-                      style={{ width: "100%", padding: "10px 14px", borderRadius: "12px", border: "1px solid #e2e8f0" }}
+                    <div style={{ minWidth: "220px" }}>
+                      <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>
+                        Nama Lengkap:
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Nama Lengkap Personel"
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        style={{
+                          width: "100%",
+                          height: "44px",
+                          padding: "0 14px",
+                          borderRadius: "10px",
+                          border: "1px solid #cbd5e1",
+                          fontSize: "0.88rem",
+                          boxSizing: "border-box",
+                          backgroundColor: "#ffffff",
+                          outline: "none",
+                        }}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>
+                        Divisi:
+                      </label>
+                      <select
+                        value={newDivision}
+                        onChange={(e) => setNewDivision(e.target.value as any)}
+                        style={{
+                          width: "100%",
+                          height: "44px",
+                          padding: "0 14px",
+                          borderRadius: "10px",
+                          border: "1px solid #cbd5e1",
+                          fontSize: "0.88rem",
+                          boxSizing: "border-box",
+                          backgroundColor: "#ffffff",
+                          outline: "none",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <option value="CLEANING_SERVICE">Cleaning Service</option>
+                        <option value="MESSENGER">Messenger Lab</option>
+                      </select>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="hireism-btn-primary"
+                      style={{
+                        height: "44px",
+                        padding: "0 22px",
+                        borderRadius: "10px",
+                        fontSize: "0.88rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        whiteSpace: "nowrap",
+                      }}
                     >
-                      <option value="CLEANING_SERVICE">Cleaning Service</option>
-                      <option value="MESSENGER">Messenger</option>
-                    </select>
+                      <Plus size={16} />
+                      <span>Tambah Personel</span>
+                    </button>
                   </div>
-
-                  <button type="submit" className="hireism-btn-primary" style={{ height: "42px" }}>
-                    <Plus size={15} /> Tambah
-                  </button>
                 </form>
               </div>
             )}
 
+            {/* Switcher Tab Kategori Divisi: Cleaning Service & Messenger */}
+            <div className="hireism-tab-bar" style={{ marginBottom: "18px" }}>
+              <button
+                type="button"
+                className={`hireism-tab-pill ${selectedDivision === "CLEANING_SERVICE" ? "active" : ""}`}
+                onClick={() => setSelectedDivision("CLEANING_SERVICE")}
+                style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 20px", fontSize: "0.85rem" }}
+              >
+                <Sparkles size={16} />
+                <span>Cleaning Service ({employees.filter((e) => e.division === "CLEANING_SERVICE").length} Personel)</span>
+              </button>
+              <button
+                type="button"
+                className={`hireism-tab-pill ${selectedDivision === "MESSENGER" ? "active" : ""}`}
+                onClick={() => setSelectedDivision("MESSENGER")}
+                style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 20px", fontSize: "0.85rem" }}
+              >
+                <Users size={16} />
+                <span>Messenger Lab ({employees.filter((e) => e.division === "MESSENGER").length} Personel)</span>
+              </button>
+            </div>
+
             <div className="hireism-table-card">
+              <div className="hireism-section-head" style={{ padding: "18px 24px", borderBottom: "1px solid #e2e8f0" }}>
+                <div>
+                  <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: "#0f172a", margin: 0 }}>
+                    Daftar Personel ({selectedDivision === "CLEANING_SERVICE" ? "Cleaning Service" : "Messenger Lab"})
+                  </h3>
+                  <p style={{ fontSize: "0.82rem", color: "#64748b", margin: "4px 0 0" }}>
+                    Total {filteredEmployees.length} personel terdaftar aktif pada kategori ini
+                  </p>
+                </div>
+              </div>
+
               <table className="hireism-table">
                 <thead>
                   <tr>
-                    <th>NIP</th>
+                    <th style={{ width: "140px" }}>NIP</th>
                     <th>NAMA PERSONEL</th>
-                    <th>DIVISI</th>
-                    <th>PENEMPATAN</th>
-                    {isAdmin && <th style={{ textAlign: "center" }}>AKSI</th>}
+                    <th style={{ width: "190px" }}>DIVISI</th>
+                    <th style={{ width: "210px" }}>PENEMPATAN</th>
+                    {isAdmin && <th style={{ textAlign: "center", width: "100px" }}>AKSI</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {filteredEmployees.map((emp) => (
                     <tr key={emp.id}>
-                      <td><code>{emp.nip}</code></td>
-                      <td><strong>{emp.fullName}</strong></td>
-                      <td>{emp.division === "CLEANING_SERVICE" ? "Cleaning Service" : "Messenger"}</td>
-                      <td>{emp.placementUnit}</td>
+                      <td>
+                        <span
+                          style={{
+                            fontFamily: "var(--font-mono)",
+                            fontWeight: 700,
+                            padding: "4px 10px",
+                            borderRadius: "6px",
+                            background: "#f1f5f9",
+                            color: "#334155",
+                            fontSize: "0.82rem",
+                            border: "1px solid #e2e8f0",
+                            display: "inline-block",
+                          }}
+                        >
+                          {emp.nip}
+                        </span>
+                      </td>
+                      <td>
+                        <strong style={{ color: "#0f172a", fontSize: "0.9rem" }}>{emp.fullName}</strong>
+                      </td>
+                      <td>
+                        <span
+                          className="hireism-pill-link"
+                          style={
+                            emp.division === "CLEANING_SERVICE"
+                              ? { color: "#2563eb", background: "#eff6ff", border: "1px solid #bfdbfe", padding: "4px 10px", fontWeight: 700 }
+                              : { color: "#7c3aed", background: "#f5f3ff", border: "1px solid #ddd6fe", padding: "4px 10px", fontWeight: 700 }
+                          }
+                        >
+                          {emp.division === "CLEANING_SERVICE" ? "Cleaning Service" : "Messenger Lab"}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{ color: "#475569", fontSize: "0.85rem", fontWeight: 500 }}>
+                          {emp.placementUnit}
+                        </span>
+                      </td>
                       {isAdmin && (
                         <td style={{ textAlign: "center" }}>
                           <button
+                            type="button"
                             onClick={() => handleDeleteEmployee(emp.id, emp.fullName)}
-                            style={{ padding: "6px 10px", background: "#fef2f2", color: "#ef4444", border: "1px solid #fecaca", borderRadius: "8px", cursor: "pointer" }}
+                            style={{
+                              padding: "6px 10px",
+                              background: "#fef2f2",
+                              color: "#ef4444",
+                              border: "1px solid #fecaca",
+                              borderRadius: "8px",
+                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              transition: "all 0.15s ease",
+                            }}
                             title="Hapus Personel"
                           >
-                            <Trash2 size={13} />
+                            <Trash2 size={14} />
                           </button>
                         </td>
                       )}
                     </tr>
                   ))}
+                  {filteredEmployees.length === 0 && (
+                    <tr>
+                      <td colSpan={isAdmin ? 5 : 4} style={{ textAlign: "center", padding: "36px", color: "#94a3b8" }}>
+                        Tidak ada data personel pada kategori {selectedDivision === "CLEANING_SERVICE" ? "Cleaning Service" : "Messenger Lab"}.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
