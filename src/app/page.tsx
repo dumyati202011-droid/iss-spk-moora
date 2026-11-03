@@ -1897,26 +1897,54 @@ export default function Home() {
                     </tr>
                   ))}
                 </tbody>
-                <tfoot>
+                <tfoot style={{ borderTop: "2px solid #cbd5e1" }}>
                   {(() => {
                     const totalWeight = filteredCriteria.reduce((sum, c) => sum + c.weight, 0);
                     const isValidWeight = Math.abs(totalWeight - 1.0) < 0.001;
                     return (
                       <tr style={{ background: "#f8fafc", fontWeight: 800 }}>
-                        <td colSpan={3}>TOTAL BOBOT:</td>
-                        <td style={{ textAlign: "right", color: isValidWeight ? "#10b981" : "#eab308", fontFamily: "var(--font-mono)" }}>
+                        <td colSpan={3} style={{ padding: "16px 20px", color: "#1e293b", fontSize: "0.85rem", letterSpacing: "0.5px" }}>
+                          TOTAL AKUMULASI BOBOT:
+                        </td>
+                        <td style={{ textAlign: "right", padding: "16px 18px", color: isValidWeight ? "#059669" : "#d97706", fontFamily: "var(--font-mono)", fontSize: "0.95rem" }}>
                           {totalWeight.toFixed(2)}
                         </td>
-                        <td style={{ textAlign: "right", color: isValidWeight ? "#10b981" : "#eab308" }}>
+                        <td style={{ textAlign: "right", padding: "16px 18px", color: isValidWeight ? "#059669" : "#d97706", fontSize: "0.95rem" }}>
                           {(totalWeight * 100).toFixed(0)}%
                         </td>
-                        <td colSpan={isAdmin ? 2 : 1} style={{ color: isValidWeight ? "#10b981" : "#dc2626" }}>
-                          {isValidWeight ? (
-                            <span>✓ Valid (Total Bobot Tepat 1.00 / 100%)</span>
-                          ) : (
-                            <span>⚠️ Total bobot saat ini {(totalWeight * 100).toFixed(1)}%. Sesuaikan agar total 100% (1.00) untuk MOORA!</span>
-                          )}
+                        <td style={{ padding: "16px 20px" }}>
+                          <div
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              padding: "5px 12px",
+                              borderRadius: "20px",
+                              background: isValidWeight ? "#ecfdf5" : "#fef2f2",
+                              color: isValidWeight ? "#059669" : "#dc2626",
+                              border: `1px solid ${isValidWeight ? "#a7f3d0" : "#fecaca"}`,
+                              fontSize: "0.78rem",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {isValidWeight ? (
+                              <>
+                                <CheckCircle2 size={14} style={{ color: "#059669" }} />
+                                <span>Valid (Total Bobot Sesuai 1.00 / 100%)</span>
+                              </>
+                            ) : (
+                              <>
+                                <AlertCircle size={14} style={{ color: "#dc2626" }} />
+                                <span>Total Bobot {(totalWeight * 100).toFixed(1)}% (Wajib Tepat 100%)</span>
+                              </>
+                            )}
+                          </div>
                         </td>
+                        {isAdmin && (
+                          <td style={{ textAlign: "center", padding: "16px", color: "#94a3b8" }}>
+                            &mdash;
+                          </td>
+                        )}
                       </tr>
                     );
                   })()}
