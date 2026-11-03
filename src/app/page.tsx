@@ -223,6 +223,21 @@ export default function Home() {
   const [editCritWeight, setEditCritWeight] = useState("0.20");
   const [editCritDesc, setEditCritDesc] = useState("");
 
+  // Custom Delete Confirmation Modal State
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    subMessage?: string;
+    onConfirm: () => Promise<void> | void;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    subMessage: "",
+    onConfirm: () => {},
+  });
+
   // Auth State
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [authChecking, setAuthChecking] = useState(true);
@@ -468,22 +483,31 @@ export default function Home() {
     }
   };
 
-  // Delete Employee
-  const handleDeleteEmployee = async (id: string, name: string) => {
-    if (!confirm(`Konfirmasi: Hapus data karyawan "${name}" beserta riwayat penilaiannya?`)) return;
-    try {
-      const res = await fetch(`/api/employees?id=${id}`, { method: "DELETE" });
-      const json = await res.json();
-      if (json.success) {
-        showToast(`Karyawan ${name} berhasil dihapus.`);
-        await fetchData();
-        await runMooraCalculation(true);
-      } else {
-        showToast(json.message || "Gagal menghapus", "error");
-      }
-    } catch {
-      showToast("Gagal menghapus karyawan", "error");
-    }
+  // Delete Employee (Custom Modal Dialog)
+  const handleDeleteEmployee = (id: string, name: string) => {
+    setDeleteConfirmModal({
+      isOpen: true,
+      title: "Hapus Data Personel",
+      message: `Apakah Anda yakin ingin menghapus personel "${name}"?`,
+      subMessage: "Seluruh riwayat penilaian, skor checklist, dan hasil pemeringkatan MOORA untuk personel ini akan dihapus permanen.",
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/employees?id=${id}`, { method: "DELETE" });
+          const json = await res.json();
+          if (json.success) {
+            showToast(`Personel ${name} berhasil dihapus.`);
+            await fetchData();
+            await runMooraCalculation(true);
+          } else {
+            showToast(json.message || "Gagal menghapus", "error");
+          }
+        } catch {
+          showToast("Gagal menghapus personel", "error");
+        } finally {
+          setDeleteConfirmModal((prev) => ({ ...prev, isOpen: false }));
+        }
+      },
+    });
   };
 
   // Criteria Handlers (Add, Edit, Delete)
@@ -584,23 +608,31 @@ export default function Home() {
     }
   };
 
-  const handleDeleteCriteria = async (id: string, code: string, name: string) => {
-    if (!confirm(`Konfirmasi Hapus Kriteria:\nApakah Anda yakin ingin menghapus kriteria "${code} - ${name}"?\nNilai penilaian terkait kriteria ini juga akan disesuaikan.`)) {
-      return;
-    }
-    try {
-      const res = await fetch(`/api/criteria?id=${id}`, { method: "DELETE" });
-      const json = await res.json();
-      if (json.success) {
-        showToast(`Kriteria ${code} - ${name} berhasil dihapus.`);
-        await fetchData();
-        await runMooraCalculation(false);
-      } else {
-        showToast(json.message || "Gagal menghapus kriteria", "error");
-      }
-    } catch {
-      showToast("Gagal menghapus kriteria", "error");
-    }
+  // Delete Criteria (Custom Modal Dialog)
+  const handleDeleteCriteria = (id: string, code: string, name: string) => {
+    setDeleteConfirmModal({
+      isOpen: true,
+      title: "Hapus Kriteria Evaluasi",
+      message: `Apakah Anda yakin ingin menghapus kriteria "${code} - ${name}"?`,
+      subMessage: "Nilai penilaian karyawan yang terkait kriteria ini akan disesuaikan otomatis dan ranking matriks MOORA akan langsung dihitung ulang.",
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`/api/criteria?id=${id}`, { method: "DELETE" });
+          const json = await res.json();
+          if (json.success) {
+            showToast(`Kriteria ${code} - ${name} berhasil dihapus.`);
+            await fetchData();
+            await runMooraCalculation(false);
+          } else {
+            showToast(json.message || "Gagal menghapus kriteria", "error");
+          }
+        } catch {
+          showToast("Gagal menghapus kriteria", "error");
+        } finally {
+          setDeleteConfirmModal((prev) => ({ ...prev, isOpen: false }));
+        }
+      },
+    });
   };
 
   // Auth Handlers
@@ -2508,6 +2540,149 @@ export default function Home() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* 4.3 MODAL KONFIRMASI HAPUS INTERAKTIF (MODERN DIALOG)               */}
+      {/* ===================================================================== */}
+      {deleteConfirmModal.isOpen && (
+        <div
+          className="settings-modal-backdrop"
+          style={{ zIndex: 1200 }}
+          onClick={() => setDeleteConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+        >
+          <div
+            className="settings-modal-card"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: "460px", padding: 0, overflow: "hidden", borderRadius: "18px", border: "1px solid #fecaca" }}
+          >
+            {/* Header Dialog */}
+            <div
+              style={{
+                background: "linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%)",
+                padding: "20px 24px 16px",
+                borderBottom: "1px solid #fecaca",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "14px",
+              }}
+            >
+              <div
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  borderRadius: "12px",
+                  background: "#ffffff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#ef4444",
+                  boxShadow: "0 4px 12px rgba(239, 68, 68, 0.15)",
+                  flexShrink: 0,
+                  border: "1px solid #fecaca",
+                }}
+              >
+                <Trash2 size={22} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: "#991b1b", margin: 0 }}>
+                  {deleteConfirmModal.title}
+                </h3>
+                <p style={{ fontSize: "0.8rem", color: "#b91c1c", margin: "3px 0 0" }}>
+                  Konfirmasi tindakan penghapusan data permanen
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "#991b1b",
+                  padding: "4px",
+                  borderRadius: "6px",
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Isi Dialog */}
+            <div style={{ padding: "20px 24px" }}>
+              <p style={{ fontSize: "0.95rem", color: "#0f172a", fontWeight: 600, lineHeight: 1.5, margin: "0 0 12px" }}>
+                {deleteConfirmModal.message}
+              </p>
+              {deleteConfirmModal.subMessage && (
+                <div
+                  style={{
+                    background: "#fefce8",
+                    border: "1px solid #fef08a",
+                    borderLeft: "4px solid #eab308",
+                    padding: "10px 14px",
+                    borderRadius: "8px",
+                    fontSize: "0.82rem",
+                    color: "#854d0e",
+                    lineHeight: 1.45,
+                  }}
+                >
+                  <span style={{ fontWeight: 700 }}>Catatan Sistem: </span>
+                  {deleteConfirmModal.subMessage}
+                </div>
+              )}
+            </div>
+
+            {/* Tombol Aksi */}
+            <div
+              style={{
+                padding: "14px 24px",
+                background: "#f8fafc",
+                borderTop: "1px solid #e2e8f0",
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "10px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+                style={{
+                  padding: "9px 18px",
+                  borderRadius: "10px",
+                  border: "1px solid #cbd5e1",
+                  background: "#ffffff",
+                  color: "#475569",
+                  fontWeight: 600,
+                  fontSize: "0.85rem",
+                  cursor: "pointer",
+                }}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={deleteConfirmModal.onConfirm}
+                style={{
+                  padding: "9px 20px",
+                  borderRadius: "10px",
+                  border: "none",
+                  background: "#ef4444",
+                  color: "#ffffff",
+                  fontWeight: 700,
+                  fontSize: "0.85rem",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  boxShadow: "0 4px 12px rgba(239, 68, 68, 0.25)",
+                }}
+              >
+                <Trash2 size={15} />
+                <span>Ya, Hapus Data</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
