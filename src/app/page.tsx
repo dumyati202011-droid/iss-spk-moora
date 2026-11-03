@@ -244,9 +244,9 @@ export default function Home() {
   // Auto fallback menu jika role tidak berwenang
   useEffect(() => {
     if (currentUser) {
-      if (isManager && (activeMenu === "assessment" || activeMenu === "employees" || activeMenu === "criteria")) {
+      if (isManager && (activeMenu === "assessment" || activeMenu === "employees")) {
         setActiveMenu("dashboard");
-      } else if (isSupervisor && (activeMenu === "employees" || activeMenu === "criteria")) {
+      } else if (isSupervisor && activeMenu === "employees") {
         setActiveMenu("dashboard");
       }
     }
@@ -336,7 +336,7 @@ export default function Home() {
   }, [mooraResults, selectedDivision, searchKeyword]);
 
   // MOORA Calculation Execution
-  const runMooraCalculation = async () => {
+  const runMooraCalculation = async (silent: boolean = false) => {
     if (!currentPeriod) return;
     try {
       setCalculating(true);
@@ -352,12 +352,18 @@ export default function Home() {
       if (json.success) {
         setMooraStepData(json.data);
         await fetchData();
-        showToast(`Kalkulasi MOORA kategori ${selectedDivision === "CLEANING_SERVICE" ? "CS" : "Messenger"} berhasil disinkronkan!`);
+        if (!silent) {
+          showToast(`Kalkulasi MOORA kategori ${selectedDivision === "CLEANING_SERVICE" ? "CS" : "Messenger"} berhasil disinkronkan!`);
+        }
       } else {
-        showToast(json.message || "Gagal menghitung MOORA", "error");
+        if (!silent) {
+          showToast(json.message || "Gagal menghitung MOORA", "error");
+        }
       }
     } catch {
-      showToast("Gagal memproses perhitungan", "error");
+      if (!silent) {
+        showToast("Gagal memproses perhitungan", "error");
+      }
     } finally {
       setCalculating(false);
     }
@@ -365,7 +371,7 @@ export default function Home() {
 
   useEffect(() => {
     if (currentPeriod && (activeMenu === "moora" || activeMenu === "dashboard")) {
-      runMooraCalculation();
+      runMooraCalculation(true);
     }
   }, [selectedDivision, activeMenu]);
 
@@ -404,7 +410,7 @@ export default function Home() {
       if (json.success) {
         showToast("Nilai penilaian berhasil disimpan ke database!");
         await fetchData();
-        await runMooraCalculation();
+        await runMooraCalculation(true);
       } else {
         showToast(json.message || "Gagal menyimpan penilaian", "error");
       }
@@ -453,7 +459,7 @@ export default function Home() {
       if (json.success) {
         showToast(`Karyawan ${name} berhasil dihapus.`);
         await fetchData();
-        await runMooraCalculation();
+        await runMooraCalculation(true);
       } else {
         showToast(json.message || "Gagal menghapus", "error");
       }
@@ -754,17 +760,19 @@ export default function Home() {
             </button>
           )}
 
-          {/* Kriteria & Bobot: Super Admin Only */}
-          {isAdmin && (
-            <button
-              className={`hireism-nav-btn ${activeMenu === "criteria" ? "active" : ""}`}
-              onClick={() => setActiveMenu("criteria")}
-            >
-              <Scale size={18} />
-              <span>Kriteria & Bobot</span>
+          {/* Kriteria & Bobot: Semua Role (Super Admin HR, Supervisor & Manager Read-Only) */}
+          <button
+            className={`hireism-nav-btn ${activeMenu === "criteria" ? "active" : ""}`}
+            onClick={() => setActiveMenu("criteria")}
+          >
+            <Scale size={18} />
+            <span>Kriteria & Bobot</span>
+            {isAdmin ? (
               <span className="nav-role-badge admin">HR</span>
-            </button>
-          )}
+            ) : (
+              <span className="nav-role-badge">Lihat</span>
+            )}
+          </button>
 
           {/* Laporan & SK: Semua Role (Khusus Manager ada label Approval) */}
           <button
@@ -804,7 +812,7 @@ export default function Home() {
 
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <button
-              onClick={runMooraCalculation}
+              onClick={() => runMooraCalculation(false)}
               disabled={calculating}
               className="hireism-btn-primary"
             >
@@ -1094,7 +1102,7 @@ export default function Home() {
               </div>
               <button
                 className="hireism-btn-primary"
-                onClick={runMooraCalculation}
+                onClick={() => runMooraCalculation(false)}
                 disabled={calculating}
                 style={{ padding: "8px 18px", fontSize: "0.82rem" }}
               >
@@ -2182,27 +2190,27 @@ export default function Home() {
           </button>
         )}
 
-        {/* Khusus Admin: Tombol Karyawan & Kriteria */}
+        {/* Khusus Admin: Tombol Karyawan */}
         {isAdmin && (
-          <>
-            <button
-              type="button"
-              className={`dock-btn ${activeMenu === "employees" ? "active" : ""}`}
-              onClick={() => setActiveMenu("employees")}
-            >
-              <Users size={20} />
-              <span>Karyawan</span>
-            </button>
-            <button
-              type="button"
-              className={`dock-btn ${activeMenu === "criteria" ? "active" : ""}`}
-              onClick={() => setActiveMenu("criteria")}
-            >
-              <Scale size={20} />
-              <span>Kriteria</span>
-            </button>
-          </>
+          <button
+            type="button"
+            className={`dock-btn ${activeMenu === "employees" ? "active" : ""}`}
+            onClick={() => setActiveMenu("employees")}
+          >
+            <Users size={20} />
+            <span>Karyawan</span>
+          </button>
         )}
+
+        {/* Kriteria: Semua Role */}
+        <button
+          type="button"
+          className={`dock-btn ${activeMenu === "criteria" ? "active" : ""}`}
+          onClick={() => setActiveMenu("criteria")}
+        >
+          <Scale size={20} />
+          <span>Kriteria</span>
+        </button>
 
         {/* Khusus Manager & Supervisor: Tombol Laporan / Pengesahan SK */}
         {(isManager || isSupervisor) && (
